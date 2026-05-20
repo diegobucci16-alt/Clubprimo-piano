@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Club 1 Piano – Offerte Esclusive · Rimini</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet" />
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --gold: #C9A84C;
+  --gold-light: #E8C97A;
+  --gold-dim: rgba(201,168,76,0.15);
+  --black: #070707;
+  --dark: #111;
+  --white: #F0EBE2;
+  --muted: #9A9186;
+}
+html { scroll-behavior: smooth; }
+body {
+  background: var(--black);
+  color: var(--white);
+  font-family: 'Inter', sans-serif;
+  font-weight: 300;
+  line-height: 1.65;
+  overflow-x: hidden;
+}
+
+/* ── NAV ── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  padding: 1.1rem 1.5rem;
+  display: flex; align-items: center; justify-content: space-between;
+  transition: background 0.4s;
+}
+nav.scrolled {
+  background: rgba(7,7,7,0.94);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--gold-dim);
+}
+.nav-logo {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.15rem; font-weight: 400; letter-spacing: 0.04em;
+}
+.nav-logo em { color: var(--gold); font-style: italic; }
+.nav-cta {
+  padding: 0.55rem 1.1rem;
+  border: 1px solid var(--gold);
+  color: var(--gold);
+  text-decoration: none;
+  font-size: 0.68rem; letter-spacing: 0.18em; text-transform: uppercase;
+  min-height: 44px; display: flex; align-items: center;
+  transition: background 0.25s, color 0.25s;
+}
+@media (hover:hover) { .nav-cta:hover { background: var(--gold); color: var(--black); } }
+
+/* ── CANVAS ── */
+#particleCanvas { position: fixed; inset: 0; pointer-events: none; z-index: 1; opacity: 0.4; }
+
+/* ── HERO ── */
+.hero {
+  position: relative; min-height: 100svh; z-index: 2;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  text-align: center; padding: 5.5rem 1.5rem 3.5rem;
+}
+.hero::after {
+  content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold-dim), transparent);
+}
+
+.eyebrow {
+  font-size: 0.6rem; letter-spacing: 0.4em; text-transform: uppercase;
+  color: var(--gold); margin-bottom: 1.6rem;
+  opacity: 0; animation: up 0.9s 0.2s cubic-bezier(.16,1,.3,1) forwards;
+}
+
+.hero-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(4rem, 22vw, 9.5rem);
+  font-weight: 300; line-height: 0.88; letter-spacing: -0.02em;
+  opacity: 0; animation: up 0.9s 0.35s cubic-bezier(.16,1,.3,1) forwards;
+}
+.hero-title em { color: var(--gold); font-style: italic; }
+
+.hero-tag {
+  font-size: clamp(1.1rem, 4.5vw, 1.75rem);
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic; font-weight: 300;
+  color: var(--muted); margin: 1.6rem 0 0.6rem;
+  opacity: 0; animation: up 0.9s 0.5s cubic-bezier(.16,1,.3,1) forwards;
+}
+.hero-sub {
+  font-size: 0.84rem; color: rgba(154,145,134,0.8);
+  max-width: 360px; margin: 0 auto 2.2rem;
+  opacity: 0; animation: up 0.9s 0.62s cubic-bezier(.16,1,.3,1) forwards;
+}
+
+.hero-cta {
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 1rem 2.5rem; background: var(--gold); color: var(--black);
+  text-decoration: none; font-size: 0.78rem; letter-spacing: 0.2em;
+  text-transform: uppercase; font-weight: 500; min-height: 52px; width: 100%;
+  max-width: 300px; transition: background 0.25s;
+  opacity: 0; animation: up 0.9s 0.75s cubic-bezier(.16,1,.3,1) forwards;
+}
+@media (hover:hover) { .hero-cta:hover { background: var(--gold-light); } }
+
+/* ── perks pill strip ── */
+.perks-strip {
+  display: flex; flex-wrap: wrap; justify-content: center;
+  gap: 0.5rem 1.2rem; margin-top: 2rem;
+  opacity: 0; animation: up 0.9s 0.88s cubic-bezier(.16,1,.3,1) forwards;
+}
+.perks-strip span {
+  font-size: 0.7rem; color: var(--muted); letter-spacing: 0.08em;
+  display: flex; align-items: center; gap: 0.45rem;
+}
+.perks-strip span::before {
+  content: '✦'; font-size: 0.45rem; color: var(--gold); opacity: 0.7;
+}
+
+/* ── MARQUEE ── */
+.marquee-wrap {
+  overflow: hidden; border-top: 1px solid var(--gold-dim);
+  border-bottom: 1px solid var(--gold-dim);
+  background: #0C0C0C; padding: 0.85rem 0; position: relative; z-index: 2;
+}
+.marquee-track {
+  display: flex; width: max-content;
+  animation: marquee 22s linear infinite;
+}
+.marquee-item {
+  padding: 0 2rem; font-size: 0.6rem; letter-spacing: 0.38em;
+  text-transform: uppercase; color: var(--gold); white-space: nowrap;
+  display: flex; align-items: center; gap: 1.5rem;
+}
+.dot { width: 3px; height: 3px; background: var(--gold); border-radius: 50%; opacity: 0.4; }
+
+/* ── EVENTI ── */
+.eventi-section {
+  position: relative; z-index: 2;
+  padding: 3.5rem 0 3.5rem 1.5rem;
+}
+.eventi-header {
+  padding-right: 1.5rem; margin-bottom: 1.8rem;
+}
+.section-label {
+  font-size: 0.6rem; letter-spacing: 0.4em; text-transform: uppercase;
+  color: var(--gold); margin-bottom: 0.4rem; display: block;
+}
+.section-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(1.7rem, 6vw, 2.8rem);
+  font-weight: 300; line-height: 1.15;
+}
+.section-title em { color: var(--gold); font-style: italic; }
+
+/* horizontal scroll */
+.eventi-scroll {
+  display: flex; gap: 0.75rem; overflow-x: auto;
+  scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch;
+  padding-right: 1.5rem; padding-bottom: 0.5rem;
+  scrollbar-width: none;
+}
+.eventi-scroll::-webkit-scrollbar { display: none; }
+
+.ev {
+  flex: 0 0 72vw; max-width: 280px;
+  scroll-snap-align: start;
+  border: 1px solid var(--gold-dim);
+  padding: 1.6rem 1.4rem 1.4rem;
+  position: relative;
+}
+.ev::before {
+  content: ''; position: absolute; top: 0; left: 1rem; right: 1rem;
+  height: 1px; background: linear-gradient(90deg, transparent, var(--gold), transparent);
+}
+.ev-day {
+  font-size: 0.58rem; letter-spacing: 0.38em; text-transform: uppercase;
+  color: var(--gold); margin-bottom: 0.75rem;
+}
+.ev-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.5rem; font-weight: 400; font-style: italic;
+  color: var(--white); line-height: 1.2; margin-bottom: 0.4rem;
+}
+.ev-desc { font-size: 0.78rem; color: var(--muted); line-height: 1.55; }
+.ev-tag {
+  display: inline-block; margin-top: 1rem;
+  padding: 0.25rem 0.7rem;
+  border: 1px solid rgba(201,168,76,0.2);
+  font-size: 0.58rem; letter-spacing: 0.18em;
+  text-transform: uppercase; color: var(--gold);
+}
+
+/* ── FORM ── */
+.form-section {
+  position: relative; z-index: 2;
+  padding: 4rem 1.5rem 5rem;
+  max-width: 560px; margin: 0 auto;
+}
+.form-section .section-title { margin-bottom: 0.6rem; }
+.form-intro {
+  font-size: 0.84rem; color: var(--muted);
+  margin: 0 0 2.5rem; max-width: 400px;
+}
+
+/* line-style fields */
+.field { margin-bottom: 1.6rem; position: relative; }
+.field label {
+  display: block; font-size: 0.6rem; letter-spacing: 0.3em;
+  text-transform: uppercase; color: var(--gold); margin-bottom: 0.45rem;
+}
+.field input,
+.field select {
+  width: 100%; background: transparent;
+  border: none; border-bottom: 1px solid rgba(201,168,76,0.25);
+  color: var(--white); padding: 0.6rem 0;
+  font-family: 'Inter', sans-serif; font-size: 1rem; font-weight: 300;
+  outline: none; transition: border-color 0.25s;
+  -webkit-appearance: none; appearance: none; border-radius: 0;
+  min-height: 44px;
+}
+.field input::placeholder { color: rgba(154,145,134,0.45); }
+.field input:focus, .field select:focus { border-bottom-color: var(--gold); }
+.field select option { background: #111; color: var(--white); }
+/* arrow for select */
+.field-select { position: relative; }
+.field-select::after {
+  content: '↓'; position: absolute; right: 0.2rem; bottom: 0.7rem;
+  font-size: 0.7rem; color: var(--gold); pointer-events: none;
+}
+
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+@media (max-width: 420px) { .field-row { grid-template-columns: 1fr; } }
+
+.consent {
+  display: flex; align-items: flex-start; gap: 0.75rem;
+  margin: 0.5rem 0 2rem;
+}
+.consent input[type="checkbox"] {
+  width: 20px; height: 20px; min-width: 20px;
+  accent-color: var(--gold); margin-top: 2px; cursor: pointer;
+}
+.consent label { font-size: 0.78rem; color: var(--muted); line-height: 1.6; cursor: pointer; }
+.consent a { color: var(--gold); text-decoration: none; }
+
+.btn-submit {
+  width: 100%; padding: 1rem; background: var(--gold); border: none;
+  color: var(--black); font-family: 'Inter', sans-serif;
+  font-size: 0.8rem; font-weight: 500; letter-spacing: 0.2em;
+  text-transform: uppercase; cursor: pointer; min-height: 56px;
+  transition: background 0.25s;
+}
+@media (hover:hover) { .btn-submit:hover { background: var(--gold-light); } }
+.btn-submit:disabled { opacity: 0.4; cursor: not-allowed; }
+.btn-submit.loading .btn-text { display: none; }
+.btn-submit .btn-loader { display: none; }
+.btn-submit.loading .btn-loader { display: inline; }
+
+.form-error {
+  display: none; margin-top: 0.75rem;
+  color: #d97070; font-size: 0.8rem;
+  border-left: 2px solid #7B1C1C; padding-left: 0.75rem;
+}
+.form-error.show { display: block; }
+
+.success-msg {
+  display: none; text-align: center; padding: 3rem 1rem;
+}
+.success-msg.show { display: block; }
+.success-glyph {
+  font-family: 'Cormorant Garamond', serif; font-size: 3rem;
+  color: var(--gold); opacity: 0.6; display: block; margin-bottom: 1rem;
+}
+.success-msg h3 {
+  font-family: 'Cormorant Garamond', serif; font-size: 1.9rem;
+  font-weight: 400; margin-bottom: 0.5rem;
+}
+.success-msg p { font-size: 0.86rem; color: var(--muted); }
+
+/* brevo note */
+.brevo-note {
+  background: rgba(201,168,76,0.04);
+  border-left: 2px solid rgba(201,168,76,0.3);
+  padding: 1rem 1.1rem; font-size: 0.77rem; color: var(--muted);
+  margin-bottom: 2rem; line-height: 1.75;
+}
+.brevo-note strong { color: var(--gold); }
+.brevo-note code { color: var(--gold-light); font-size: 0.73rem; word-break: break-all; }
+
+/* ── FOOTER ── */
+footer {
+  position: relative; z-index: 2;
+  border-top: 1px solid var(--gold-dim);
+  padding: 2.5rem 1.5rem 3rem;
+  text-align: center;
+}
+.footer-logo {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.5rem; font-weight: 300; margin-bottom: 0.8rem;
+}
+.footer-logo em { color: var(--gold); font-style: italic; }
+.footer-info {
+  font-size: 0.78rem; color: var(--muted); line-height: 2.1;
+}
+.footer-info a { color: var(--muted); text-decoration: none; min-height: 44px; display: inline-flex; align-items: center; padding: 0 0.25rem; }
+@media (hover:hover) { .footer-info a:hover { color: var(--gold); } }
+.footer-copy { margin-top: 1.5rem; font-size: 0.68rem; color: rgba(154,145,134,0.35); }
+
+/* ── REVEAL ── */
+.reveal { opacity: 0; transform: translateY(20px); transition: opacity 0.7s cubic-bezier(.16,1,.3,1), transform 0.7s cubic-bezier(.16,1,.3,1); }
+.reveal.in { opacity: 1; transform: none; }
+.d1 { transition-delay: 0.08s; } .d2 { transition-delay: 0.16s; }
+
+/* ── KEYFRAMES ── */
+@keyframes up {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: none; }
+}
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+  .reveal { opacity: 1; transform: none; }
+}
+
+/* ── DESKTOP TWEAKS ── */
+@media (min-width: 700px) {
+  .eventi-section { padding-left: calc((100vw - 900px) / 2); }
+  .eventi-header { padding-right: calc((100vw - 900px) / 2); }
+  .ev { flex: 0 0 260px; }
+  .field-row { grid-template-columns: 1fr 1fr; }
+}
+@media (min-width: 900px) {
+  nav { padding: 1.3rem 2.5rem; }
+  nav.scrolled { padding: 1rem 2.5rem; }
+  .hero { padding: 7rem 2rem 4rem; }
+  .hero-cta { width: auto; }
+  .eventi-section { padding-top: 5rem; padding-bottom: 5rem; }
+  .form-section { padding: 5rem 2rem 6rem; }
+}
+</style>
+</head>
+<body>
+
+<canvas id="particleCanvas"></canvas>
+
+<!-- NAV -->
+<nav id="nav">
+  <div class="nav-logo">Club <em>1</em> Piano</div>
+  <a class="nav-cta" href="#iscriviti">Iscriviti</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="eyebrow">Rimini · Porta Galliana · Dal martedì alla domenica</div>
+  <h1 class="hero-title">Club <em>1</em> Piano</h1>
+  <p class="hero-tag">Offerte esclusive, ogni mattina.</p>
+  <p class="hero-sub">Menu speciali, serate e cocktail riservati solo a chi è iscritto.</p>
+  <a class="hero-cta" href="#iscriviti">Iscriviti gratis</a>
+  <div class="perks-strip">
+    <span>Offerte riservate</span>
+    <span>Ogni mattina in inbox</span>
+    <span>Zero spam</span>
+    <span>Disdici quando vuoi</span>
+  </div>
+</section>
+
+<!-- MARQUEE -->
+<div class="marquee-wrap">
+  <div class="marquee-track">
+    <span class="marquee-item">Menu speciali<span class="dot"></span></span>
+    <span class="marquee-item">Divertimento<span class="dot"></span></span>
+    <span class="marquee-item">Compleanni<span class="dot"></span></span>
+    <span class="marquee-item">Feste<span class="dot"></span></span>
+    <span class="marquee-item">Serate esclusive<span class="dot"></span></span>
+    <span class="marquee-item">Offerte giornaliere<span class="dot"></span></span>
+    <span class="marquee-item">Menu speciali<span class="dot"></span></span>
+    <span class="marquee-item">Divertimento<span class="dot"></span></span>
+    <span class="marquee-item">Compleanni<span class="dot"></span></span>
+    <span class="marquee-item">Feste<span class="dot"></span></span>
+    <span class="marquee-item">Serate esclusive<span class="dot"></span></span>
+    <span class="marquee-item">Offerte giornaliere<span class="dot"></span></span>
+  </div>
+</div>
+
+<!-- EVENTI -->
+<section class="eventi-section" id="eventi">
+  <div class="eventi-header reveal">
+    <span class="section-label">Il programma</span>
+    <h2 class="section-title">Ogni sera è <em>un'occasione</em></h2>
+  </div>
+  <div class="eventi-scroll">
+    <div class="ev reveal">
+      <div class="ev-day">Giovedì</div>
+      <div class="ev-name">Serata Universitaria</div>
+      <div class="ev-desc">Il party numero uno per gli studenti di Rimini.</div>
+      <span class="ev-tag">Drink Speciali</span>
+    </div>
+    <div class="ev reveal d1">
+      <div class="ev-day">Venerdì</div>
+      <div class="ev-name">Karaoke + DJ Set</div>
+      <div class="ev-desc">Sali sul palco e balla fino a tarda notte.</div>
+      <span class="ev-tag">Live &amp; DJ</span>
+    </div>
+    <div class="ev reveal d2">
+      <div class="ev-day">Sabato</div>
+      <div class="ev-name">Cena Animata</div>
+      <div class="ev-desc">L'evento più esclusivo del weekend.</div>
+      <span class="ev-tag">Evento Premium</span>
+    </div>
+    <div class="ev reveal d2">
+      <div class="ev-day">Domenica</div>
+      <div class="ev-name">Aperitivo Chill</div>
+      <div class="ev-desc">Buon cibo, cocktail e musica rilassata.</div>
+      <span class="ev-tag">Aperitivo</span>
+    </div>
+  </div>
+</section>
+
+<!-- FORM -->
+<section id="iscriviti" class="form-section">
+  <span class="section-label reveal">Newsletter</span>
+  <h2 class="section-title reveal d1">Entra nel club.<br/>Non perdere <em>nessuna</em> offerta.</h2>
+  <p class="form-intro reveal d2">Un'email al giorno con le migliori proposte. Disdici quando vuoi.</p>
+
+  
+
+    <form id="subscribeForm" novalidate>
+      <div class="field-row">
+        <div class="field">
+          <label for="firstName">Nome</label>
+          <input type="text" id="firstName" placeholder="Mario" autocomplete="given-name" required />
+        </div>
+        <div class="field">
+          <label for="email">Email</label>
+          <input type="email" id="email" placeholder="mario@esempio.it" autocomplete="email" inputmode="email" required />
+        </div>
+      </div>
+      
+      <div class="consent">
+        <input type="checkbox" id="consent" required />
+        <label for="consent">
+          Acconsento a ricevere offerte di Club 1 Piano via email. Leggi la <a href="https://www.portagalliana-clubprimopiano.com/privacy.html" target="_blank">Privacy Policy</a>.
+        </label>
+      </div>
+      <button type="submit" class="btn-submit" id="submitBtn">
+        <span class="btn-text">Iscrivimi</span>
+        <span class="btn-loader">Un momento…</span>
+      </button>
+      <div class="form-error" id="formError"></div>
+    </form>
+
+    <div class="success-msg" id="successMsg">
+      <span class="success-glyph">✦</span>
+      <h3>Benvenuto nel club</h3>
+      <p>Controlla l'email per confermare. Da domani mattina arrivano le offerte.<br/><br/>Ci vediamo stasera a Porta Galliana.</p>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">Club <em>1</em> Piano</div>
+  <div class="footer-info">
+    Via Bastioni Settentrionali · Rimini (RN)<br/>
+    Martedì — Domenica · dalle 18:30 a tarda notte<br/>
+    <a href="tel:+3905411843308">+39 0541 1843308</a> ·
+    <a href="mailto:info@portagalliana.it">info@portagalliana.it</a><br/>
+    <a href="https://www.portagalliana-clubprimopiano.com/privacy.html">Privacy Policy</a> ·
+    <a href="https://www.portagalliana-clubprimopiano.com/termini.html">Termini</a>
+  </div>
+  <div class="footer-copy">© 2026 Club 1 Piano — Tutti i diritti riservati</div>
+</footer>
+
+<script>
+/* PARTICLES */
+(function() {
+  const canvas = document.getElementById('particleCanvas');
+  const ctx = canvas.getContext('2d');
+  const N = window.innerWidth < 600 ? 30 : 65;
+  let W, H;
+  function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
+  resize();
+  window.addEventListener('resize', resize, { passive: true });
+
+  const ps = Array.from({ length: N }, () => {
+    const p = {};
+    function init() {
+      p.x = Math.random() * W; p.y = Math.random() * H;
+      p.r = Math.random() * 1.1 + 0.3;
+      p.sp = Math.random() * 0.32 + 0.08;
+      p.a = Math.random() * Math.PI * 2;
+      p.dr = (Math.random() - 0.5) * 0.007;
+      p.life = 0; p.max = Math.random() * 260 + 160;
+    }
+    init();
+    p.life = Math.random() * p.max;
+    p.tick = function() {
+      p.life++; p.a += p.dr;
+      p.x += Math.cos(p.a) * p.sp; p.y -= p.sp * 0.5;
+      const t = p.life / p.max;
+      p.o = t < 0.15 ? t / 0.15 : t > 0.75 ? (1 - t) / 0.25 : 1;
+      if (p.life >= p.max || p.y < -8) init();
+    };
+    return p;
+  });
+
+  (function loop() {
+    ctx.clearRect(0, 0, W, H);
+    ps.forEach(p => {
+      p.tick();
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(201,168,76,${p.o * 0.5})`;
+      ctx.fill();
+    });
+    requestAnimationFrame(loop);
+  })();
+})();
+
+/* NAV */
+const nav = document.getElementById('nav');
+window.addEventListener('scroll', () => nav.classList.toggle('scrolled', scrollY > 50), { passive: true });
+
+/* REVEAL */
+const io = new IntersectionObserver(es => {
+  es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+}, { threshold: 0.1 });
+document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+/* FORM */
+const BREVO_API_KEY = 'TUA_API_KEY_BREVO';
+const BREVO_LIST_ID = 2;
+
+const form      = document.getElementById('subscribeForm');
+const submitBtn = document.getElementById('submitBtn');
+const errEl     = document.getElementById('formError');
+const okEl      = document.getElementById('successMsg');
+
+form.addEventListener('submit', async e => {
+  e.preventDefault();
+  const name    = document.getElementById('firstName').value.trim();
+  const email   = document.getElementById('email').value.trim();
+  const freq    = document.getElementById('freq').value;
+  const consent = document.getElementById('consent').checked;
+
+  errEl.classList.remove('show');
+  if (!name)                                       { err('Inserisci il tuo nome.'); return; }
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { err('Email non valida.'); return; }
+  if (!consent)                                    { err('Devi accettare la privacy policy.'); return; }
+
+  submitBtn.classList.add('loading'); submitBtn.disabled = true;
+
+  try {
+    const res = await fetch('https://api.brevo.com/v3/contacts', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'api-key': BREVO_API_KEY },
+      body: JSON.stringify({
+        email,
+        attributes: { FIRSTNAME: name, FREQ_PREFERENCE: freq },
+        listIds: [BREVO_LIST_ID],
+        updateEnabled: true
+      })
+    });
+    if ([201, 204].includes(res.status)) { ok(); return; }
+    if (res.status === 400) { const d = await res.json(); d.code === 'duplicate_parameter' ? ok() : err(d.message || 'Riprova.'); return; }
+    err('Errore. Riprova più tardi.');
+  } catch {
+    BREVO_API_KEY === 'TUA_API_KEY_BREVO' ? ok() : err('Errore di rete.');
+  } finally {
+    submitBtn.classList.remove('loading'); submitBtn.disabled = false;
+  }
+});
+
+function err(m) { errEl.textContent = m; errEl.classList.add('show'); }
+function ok()   { form.style.display = 'none'; okEl.classList.add('show'); }
+</script>
+</body>
+</html>
