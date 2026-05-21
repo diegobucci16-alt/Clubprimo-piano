@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="x-apple-disable-message-reformatting" />
+<title>Birre Gratis Martedì · Club 1 Piano</title>
+<style>
+  body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+  table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; border-collapse: collapse; }
+  img { border: 0; display: block; outline: none; }
+  body { margin: 0; padding: 0; background-color: #1A1A1A; font-family: Georgia, serif; }
+
+  .wrapper { background-color: #1A1A1A; padding: 24px 16px; }
+  .container { max-width: 480px; margin: 0 auto; background-color: #111111; border: 1px solid #2E2E2E; }
+
+  /* HEADER */
+  .header { background-color: #0A0A0A; padding: 20px 24px 16px; text-align: center; border-bottom: 2px solid #C9A84C; }
+  .logo-small { font-size: 10px; letter-spacing: 0.3em; color: #8A6A20; text-transform: uppercase; font-family: Arial, sans-serif; margin: 0 0 4px; }
+  .logo-name { font-size: 26px; font-weight: 700; color: #F5F0E8; margin: 0; font-family: Georgia, serif; letter-spacing: -0.01em; }
+  .logo-name span { color: #C9A84C; font-style: italic; }
+
+  /* GOLD BAND */
+  .gold-band { background-color: #C9A84C; padding: 8px 16px; text-align: center; }
+  .gold-band p { font-size: 10px; letter-spacing: 0.25em; text-transform: uppercase; color: #0A0A0A; font-weight: 700; font-family: Arial, sans-serif; margin: 0; }
+
+  /* HERO */
+  .hero { background-color: #0A0A0A; padding: 28px 24px 18px; text-align: center; }
+  .hero-day { font-size: 10px; letter-spacing: 0.3em; text-transform: uppercase; color: #C9A84C; font-family: Arial, sans-serif; display: block; margin-bottom: 10px; }
+  .hero-title { font-size: 44px; color: #F5F0E8; line-height: 1.05; margin: 0 0 14px; font-family: Georgia, serif; }
+  .hero-title em { color: #C9A84C; font-style: italic; }
+  .hero-sub { font-size: 13px; color: #B8B0A0; font-family: Arial, sans-serif; line-height: 1.7; margin: 0; }
+
+  /* DIVIDER */
+  .divider { height: 1px; background-color: #2E2E2E; margin: 0 24px; }
+
+  /* BEERS */
+  .beers { background-color: #0A0A0A; padding: 20px 24px 14px; }
+  .beers-label { font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; color: #8A6A20; font-family: Arial, sans-serif; display: block; text-align: center; margin-bottom: 14px; }
+  .beer-table { width: 100%; border-collapse: separate; border-spacing: 6px; }
+  .beer-cell { background-color: #1A1A1A; border: 1px solid #C9A84C; padding: 10px 6px; text-align: center; width: 33.33%; vertical-align: top; }
+  .beer-name { display: block; font-size: 11px; color: #F5F0E8; font-family: Arial, sans-serif; margin-bottom: 3px; }
+  .beer-old { display: block; font-size: 10px; color: #5F5E5A; font-family: Arial, sans-serif; text-decoration: line-through; }
+  .beer-free { display: block; font-size: 13px; color: #C9A84C; font-family: Arial, sans-serif; font-weight: 700; }
+
+  /* BADGE */
+  .badge-wrap { background-color: #0A0A0A; padding: 10px 24px 20px; text-align: center; }
+  .badge { background-color: #8B1A1A; color: #F5C4B3; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; font-family: Arial, sans-serif; padding: 5px 12px; display: inline-block; }
+
+  /* QR BLOCK */
+  .qr-block { background-color: #111111; border-top: 1px solid #2E2E2E; border-bottom: 1px solid #2E2E2E; padding: 22px 24px; text-align: center; }
+  .qr-title { font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; color: #C9A84C; font-family: Arial, sans-serif; display: block; margin-bottom: 16px; }
+  .qr-svg { margin: 0 auto 14px; display: block; }
+  .qr-desc { font-size: 12px; color: #B8B0A0; font-family: Arial, sans-serif; line-height: 1.7; margin: 0; }
+  .qr-desc strong { color: #F5F0E8; font-weight: normal; }
+
+  /* STEPS */
+  .steps { background-color: #0A0A0A; padding: 18px 24px; }
+  .step-row { display: flex; align-items: flex-start; gap: 12px; padding: 10px 0; border-bottom: 1px solid #1A1A1A; }
+  .step-row:last-child { border-bottom: none; }
+  .step-num { background-color: #C9A84C; color: #0A0A0A; font-size: 11px; font-weight: 700; font-family: Arial, sans-serif; width: 22px; height: 22px; min-width: 22px; text-align: center; line-height: 22px; display: inline-block; }
+  .step-txt { font-size: 12px; color: #B8B0A0; font-family: Arial, sans-serif; line-height: 1.6; margin: 0; padding-top: 2px; }
+  .step-txt strong { color: #F5F0E8; font-weight: normal; }
+
+  /* Fallback for email clients that don't support flexbox */
+  @media all {
+    .step-row { display: table; width: 100%; }
+    .step-num { display: table-cell; vertical-align: top; }
+    .step-txt { display: table-cell; vertical-align: top; padding-left: 12px; }
+  }
+
+  /* CTA */
+  .cta-wrap { background-color: #0A0A0A; padding: 20px 24px 24px; text-align: center; }
+  .cta-btn { display: block; background-color: #C9A84C; color: #0A0A0A; font-family: Arial, sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; padding: 16px 24px; text-decoration: none; }
+
+  /* FOOTER */
+  .footer { background-color: #0A0A0A; padding: 18px 24px 22px; text-align: center; border-top: 1px solid #1A1A1A; }
+  .footer p { font-size: 10px; color: #444441; font-family: Arial, sans-serif; line-height: 2.2; margin: 0; }
+  .footer a { color: #8A6A20; text-decoration: none; }
+</style>
+</head>
+<body>
+<div class="wrapper">
+<div class="container">
+
+  <!-- HEADER -->
+  <div class="header">
+    <p class="logo-small">Porta Galliana · Rimini</p>
+    <p class="logo-name">Club <span>1</span> Piano</p>
+  </div>
+
+  <!-- GOLD BAND -->
+  <div class="gold-band">
+    <p>Offerta esclusiva iscritti &middot; Solo martedì</p>
+  </div>
+
+  <!-- HERO -->
+  <div class="hero">
+    <span class="hero-day">Martedì sera</span>
+    <h1 class="hero-title">Birre<br/><em>gratis</em><br/>per te</h1>
+    <p class="hero-sub">Mostra il tuo QR al bancone e la prima birra è offerta dalla casa.</p>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- BIRRE -->
+  <div class="beers">
+    <span class="beers-label">Incluse nell'offerta</span>
+    <table class="beer-table" role="presentation">
+      <tr>
+        <td class="beer-cell">
+          <span class="beer-name">Bionda 0,45</span>
+          <span class="beer-old">€ 6,00</span>
+          <span class="beer-free">Gratis</span>
+        </td>
+        <td class="beer-cell">
+          <span class="beer-name">Leffe Rossa</span>
+          <span class="beer-old">€ 7,00</span>
+          <span class="beer-free">Gratis</span>
+        </td>
+        <td class="beer-cell">
+          <span class="beer-name">Weizen 0,5</span>
+          <span class="beer-old">€ 7,00</span>
+          <span class="beer-free">Gratis</span>
+        </td>
+      </tr>
+    </table>
+  </div>
+  <div class="badge-wrap">
+    <span class="badge">Valido solo stasera &middot; fino a esaurimento</span>
+  </div>
+
+  <!-- QR CODE -->
+  <div class="qr-block">
+    <span class="qr-title">Il tuo QR personale</span>
+    <!--
+      ════════════════════════════════════════════
+      QR CODE — COME PERSONALIZZARLO SU BREVO
+      ════════════════════════════════════════════
+      Opzione 1 (consigliata):
+      Usa un servizio QR dinamico come api.qrserver.com
+      Sostituisci l'SVG qui sotto con un tag <img>:
+
+      <img class="qr-svg" width="130" height="130"
+        src="https://api.qrserver.com/v1/create-qr-code/?size=130x130&data={{contact.EMAIL}}&color=0A0A0A&bgcolor=F5F0E8"
+        alt="QR code personale di {{contact.FIRSTNAME}}" />
+
+      Opzione 2:
+      Genera un QR univoco per contatto tramite Brevo
+      Automation + webhook verso il tuo backend.
+      ════════════════════════════════════════════
+    -->
+    <svg class="qr-svg" width="130" height="130" viewBox="0 0 130 130" xmlns="http://www.w3.org/2000/svg">
+      <rect width="130" height="130" fill="#F5F0E8"/>
+      <rect x="8" y="8" width="46" height="46" rx="3" fill="none" stroke="#0A0A0A" stroke-width="3"/>
+      <rect x="16" y="16" width="30" height="30" rx="1" fill="#0A0A0A"/>
+      <rect x="76" y="8" width="46" height="46" rx="3" fill="none" stroke="#0A0A0A" stroke-width="3"/>
+      <rect x="84" y="16" width="30" height="30" rx="1" fill="#0A0A0A"/>
+      <rect x="8" y="76" width="46" height="46" rx="3" fill="none" stroke="#0A0A0A" stroke-width="3"/>
+      <rect x="16" y="84" width="30" height="30" rx="1" fill="#0A0A0A"/>
+      <rect x="76" y="76" width="8" height="8" fill="#0A0A0A"/>
+      <rect x="88" y="76" width="8" height="8" fill="#0A0A0A"/>
+      <rect x="100" y="76" width="8" height="8" fill="#0A0A0A"/>
+      <rect x="112" y="76" width="8" height="8" fill="#0A0A0A"/>
+      <rect x="76" y="88" width="8" height="8" fill="#0A0A0A"/>
+      <rect x="100" y="88" width="8" height="8" fill="#0A0A0A"/>
+      <rect x="76" y="100" width="8" height="8" fill="#0A0A0A"/>
+      <rect x="88" y="100" width="8" height="8" fill="#0A0A0A"/>
+      <rect x="112" y="100" width="8" height="8" fill="#0A0A0A"/>
+      <rect x="76" y="112" width="8" height="8" fill="#0A0A0A"/>
+      <rect x="100" y="112" width="8" height="8" fill="#0A0A0A"/>
+      <rect x="112" y="112" width="8" height="8" fill="#0A0A0A"/>
+      <rect x="62" y="8" width="6" height="6" fill="#C9A84C"/>
+      <rect x="62" y="20" width="6" height="6" fill="#0A0A0A"/>
+      <rect x="62" y="32" width="6" height="6" fill="#0A0A0A"/>
+      <rect x="62" y="44" width="6" height="6" fill="#C9A84C"/>
+      <rect x="8" y="62" width="6" height="6" fill="#0A0A0A"/>
+      <rect x="20" y="62" width="6" height="6" fill="#C9A84C"/>
+      <rect x="32" y="62" width="6" height="6" fill="#0A0A0A"/>
+      <rect x="44" y="62" width="6" height="6" fill="#0A0A0A"/>
+      <rect x="56" y="62" width="6" height="6" fill="#C9A84C"/>
+      <rect x="68" y="62" width="6" height="6" fill="#0A0A0A"/>
+      <rect x="80" y="62" width="6" height="6" fill="#0A0A0A"/>
+      <rect x="92" y="62" width="6" height="6" fill="#C9A84C"/>
+      <rect x="104" y="62" width="6" height="6" fill="#0A0A0A"/>
+      <rect x="116" y="62" width="6" height="6" fill="#0A0A0A"/>
+      <text x="65" y="71" text-anchor="middle" font-size="6" fill="#C9A84C" font-family="Arial"></text>
+    </svg>
+    <p class="qr-desc">Valido per <strong>1 birra gratis</strong> a persona<br/>
+    Mostralo al cameriere o al bancone per approfittare dell'offerta</p>
+  </div>
+
+  <!-- STEP HOW TO -->
+  <div class="steps">
+    <div class="step-row">
+      <span class="step-num">1</span>
+      <p class="step-txt"><strong>Apri questa email</strong> quando sei al locale</p>
+    </div>
+    <div class="step-row">
+      <span class="step-num">2</span>
+      <p class="step-txt"><strong>Mostra il QR</strong> al bancone o al cameriere</p>
+    </div>
+    <div class="step-row">
+      <span class="step-num">3</span>
+      <p class="step-txt"><strong>Scegli la tua birra</strong> tra quelle dell'offerta</p>
+    </div>
+  </div>
+
+  <!-- CTA -->
+  <div class="cta-wrap">
+    <a class="cta-btn" href="https://www.portagalliana-clubprimopiano.com/">Prenota il tuo tavolo</a>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <p>
+      Club 1 Piano &middot; Via Bastioni Settentrionali, Rimini<br/>
+      Dal martedì alla domenica &middot; dalle 18:30 a tarda notte<br/>
+      +39 0541 1843308 &middot; info@portagalliana.it<br/><br/>
+
+      <a href="https://www.portagalliana-clubprimopiano.com/privacy.html">Privacy Policy</a><br/>
+      Hai ricevuto questa email perché sei iscritto alle offerte di Club 1 Piano.
+    </p>
+  </div>
+
+</div>
+</div>
+</body>
+</html>
