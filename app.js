@@ -1,66 +1,17 @@
 /* ================================================
    CLUB 1 PIANO — APP JS
-   ================================================
-   CONFIGURAZIONE SUPABASE:
-   Sostituisci SUPABASE_URL e SUPABASE_ANON_KEY
-   con i valori del tuo progetto Supabase.
    ================================================ */
 
-const SUPABASE_URL  = 'https://TUO-PROGETTO.supabase.co';
-const SUPABASE_ANON = 'TUA-ANON-KEY';
-
-// Inizializza Supabase (se le credenziali sono settate)
-let sb = null;
-try {
-  if (SUPABASE_URL.includes('TUO-PROGETTO')) {
-    console.warn('⚠️ Inserisci SUPABASE_URL e SUPABASE_ANON in app.js');
-  } else {
-    sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
-  }
-} catch(e) { console.warn('Supabase non disponibile:', e); }
+// URL del backend su Render — cambia con il tuo URL
+const API = 'https://club1piano.onrender.com';
 
 // ===== STATO UTENTE =====
-let currentUser = null;   // oggetto Supabase auth user
-let userProfile = null;   // riga dalla tabella profiles
+let currentUser = null;
+let userProfile = null;
+let isGuest     = false;
 
-// ===== DATI OFFERTE (in futuro da Supabase) =====
-const OFFERS = [
-  {
-    id: 1, category: 'drink', tag: '-30%',
-    name: 'Mojito Classico',
-    desc: 'Ogni giovedì sera per i soci Club. Mostra il QR prima di ordinare.',
-    price: '€6,30', orig: '€9,00',
-    expiry: 'Scade giovedì 19 giugno', active: true,
-  },
-  {
-    id: 2, category: 'food', tag: '2x1',
-    name: 'Smash Burger',
-    desc: 'Venerdì sera: ordina un burger e il secondo è gratis. Valido 19:00–21:00.',
-    price: '€8,00', orig: '€16,00',
-    expiry: 'Scade venerdì 20 giugno', active: true,
-  },
-  {
-    id: 3, category: 'evento', tag: 'Free',
-    name: 'DJ Set Sabato',
-    desc: 'I soci entrano gratis al DJ Set del sabato. Mostra il QR all\'ingresso.',
-    price: 'Gratis', orig: '€10,00',
-    expiry: 'Scade sabato 21 giugno', active: true,
-  },
-  {
-    id: 4, category: 'drink', tag: '-20%',
-    name: 'Spritz Aperitivo',
-    desc: 'Domenica aperitivo dalle 18:30. Accumula punti extra.',
-    price: '€5,60', orig: '€7,00',
-    expiry: 'Disponibile da domenica 22', active: false,
-  },
-  {
-    id: 5, category: 'food', tag: '-15%',
-    name: 'Pizza della Settimana',
-    desc: 'Una pizza a scelta tra le speciali del giorno con sconto soci.',
-    price: '€8,50', orig: '€10,00',
-    expiry: 'Disponibile da mercoledì 25', active: false,
-  },
-];
+// ===== OFFERTE (dal server) =====
+let OFFERS = [];
 
 // ===== LIVELLI =====
 const LEVELS = [
@@ -68,7 +19,6 @@ const LEVELS = [
   { name: 'Gold',     min: 300,  max: 1000, next: 'Platinum' },
   { name: 'Platinum', min: 1000, max: 9999, next: null },
 ];
-
 function getLevel(pts) {
   return LEVELS.find(l => pts >= l.min && pts < l.max) || LEVELS[LEVELS.length - 1];
 }
@@ -82,12 +32,10 @@ function goTo(screenId) {
   screenHistory.push(currentScreen);
   _activateScreen(screenId);
 }
-
 function goBack() {
   const prev = screenHistory.pop();
   if (prev) _activateScreen(prev);
 }
-
 function _activateScreen(screenId) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById(screenId).classList.add('active');
@@ -100,150 +48,125 @@ function _activateScreen(screenId) {
 }
 
 // ===== AUTH =====
-function switchTab(tab) {
-  document.getElementById('form-login').classList.toggle('hidden', tab !== 'login');
-  document.getElementById('form-register').classList.toggle('hidden', tab !== 'register');
-  document.getElementById('tab-login').classList.toggle('active', tab === 'login');
-  document.getElementById('tab-register').classList.toggle('active', tab === 'register');
-}
-
-async function handleLogin() {
-  const email = document.getElementById('login-email').value.trim();
-  const pass  = document.getElementById('login-password').value;
-  const errEl = document.getElementById('login-error');
-  const btn   = document.getElementById('login-btn');
-
-  errEl.classList.add('hidden');
-  if (!email || !pass) { showAuthError(errEl, 'Compila tutti i campi'); return; }
-
-  btn.disabled = true; btn.textContent = 'Accesso…';
-
-  if (!sb) {
-    // DEMO: login senza Supabase
-    demoLogin(email);
-    btn.disabled = false; btn.textContent = 'Entra';
-    return;
-  }
-
-  const { data, error } = await sb.auth.signInWithPassword({ email, password: pass });
-  btn.disabled = false; btn.textContent = 'Entra';
-  if (error) { showAuthError(errEl, tradErr(error.message)); return; }
-  await loadProfile(data.user);
-  enterApp();
-}
-
-async function handleRegister() {
-  const name    = document.getElementById('reg-name').value.trim();
-  const surname = document.getElementById('reg-surname').value.trim();
-  const email   = document.getElementById('reg-email').value.trim();
-  const pass    = document.getElementById('reg-password').value;
-  const errEl   = document.getElementById('reg-error');
-  const btn     = document.getElementById('register-btn');
-
-  errEl.classList.add('hidden');
-  if (!name || !surname || !email || !pass) { showAuthError(errEl, 'Compila tutti i campi'); return; }
-  if (pass.length < 8) { showAuthError(errEl, 'Password min. 8 caratteri'); return; }
-
-  btn.disabled = true; btn.textContent = 'Creazione…';
-
-  if (!sb) {
-    demoLogin(email, name, surname);
-    btn.disabled = false; btn.textContent = 'Crea account';
-    return;
-  }
-
-  const { data, error } = await sb.auth.signUp({
-    email, password: pass,
-    options: { data: { nome: name, cognome: surname } }
-  });
-  btn.disabled = false; btn.textContent = 'Crea account';
-  if (error) { showAuthError(errEl, tradErr(error.message)); return; }
-
-  // Crea riga profilo
-  if (data.user) {
-    await sb.from('profiles').upsert({
-      id: data.user.id, nome: name, cognome: surname,
-      email, punti: 0, visite: 0, offerte_usate: 0
-    });
-    await loadProfile(data.user);
-  }
-  enterApp();
-}
-
 async function handleLogout() {
-  if (sb) await sb.auth.signOut();
-  currentUser = null; userProfile = null;
-  document.getElementById('app').classList.add('hidden');
-  document.getElementById('auth-screen').classList.remove('hidden');
+  await fetch(API + '/api/auth/logout', { method: 'POST' });
+  currentUser = null;
+  userProfile = null;
+  window.location.replace('login.html');
 }
 
-// DEMO login (senza Supabase configurato)
-function demoLogin(email, name, surname) {
-  const parts = email.split('@')[0].split('.');
-  currentUser = { id: 'demo-' + Date.now(), email };
-  userProfile = {
-    nome: name || (parts[0] ? capitalize(parts[0]) : 'Utente'),
-    cognome: surname || (parts[1] ? capitalize(parts[1]) : ''),
-    email,
-    punti: 0, visite: 0, offerte_usate: 0
-  };
-  enterApp();
+function requireAuth(fn) {
+  if (isGuest) { showToast('Accedi per usare questa funzione'); return; }
+  fn();
 }
 
-async function loadProfile(user) {
-  currentUser = user;
-  if (!sb) return;
-  const { data } = await sb.from('profiles').select('*').eq('id', user.id).single();
-  userProfile = data || {
-    nome: user.user_metadata?.nome || 'Utente',
-    cognome: user.user_metadata?.cognome || '',
-    email: user.email,
-    punti: 0, visite: 0, offerte_usate: 0
-  };
-}
-
-function enterApp() {
-  document.getElementById('auth-screen').classList.add('hidden');
+// ===== ENTER APP =====
+async function enterApp() {
   document.getElementById('app').classList.remove('hidden');
-  updateUI();
+  await loadOffers();
+  if (isGuest) {
+    applyGuestMode();
+  } else {
+    updateUI();
+    registerServiceWorker();
+    checkPushStatus();
+  }
   renderHomeOffers();
   renderOfferList('all');
   initFilters();
   setGreeting();
-  scheduleLocalPush();
-  checkPushStatus();
 }
 
-function showAuthError(el, msg) {
-  el.textContent = msg; el.classList.remove('hidden');
+async function loadOffers() {
+  try {
+    const res = await fetch(API + '/api/offers');
+    if (res.ok) {
+      const data = await res.json();
+      OFFERS = data.map(o => ({
+        id:       o.id,
+        category: o.category,
+        tag:      o.tag,
+        name:     o.name,
+        desc:     o.description,
+        price:    o.price,
+        orig:     o.original_price,
+        expiry:   o.expiry,
+        active:   o.active,
+      }));
+    }
+  } catch(e) {
+    console.warn('Offerte non disponibili:', e);
+  }
 }
 
-function tradErr(msg) {
-  if (msg.includes('Invalid login')) return 'Email o password errati';
-  if (msg.includes('already registered')) return 'Email già registrata';
-  if (msg.includes('Password')) return 'Password troppo corta (min. 8 caratteri)';
-  return msg;
+// ===== GUEST MODE =====
+function applyGuestMode() {
+  const heroCard = document.querySelector('.hero-card');
+  if (heroCard) {
+    heroCard.style.pointerEvents = 'none';
+    heroCard.style.position = 'relative';
+    heroCard.insertAdjacentHTML('beforeend', `
+      <div class="guest-lock-overlay">
+        <div class="guest-lock-box">
+          <div class="guest-lock-icon">🔒</div>
+          <div class="guest-lock-title">Accedi per vedere i tuoi punti</div>
+          <button class="guest-lock-btn" onclick="goToLogin()">Accedi o registrati</button>
+        </div>
+      </div>
+    `);
+  }
+  const qrScreen = document.getElementById('screen-qr');
+  if (qrScreen) {
+    qrScreen.insertAdjacentHTML('beforeend', `
+      <div class="guest-screen-lock">
+        <div class="guest-lock-box">
+          <div class="guest-lock-icon">🎫</div>
+          <div class="guest-lock-title">QR riservato ai soci</div>
+          <div class="guest-lock-sub">Crea un account gratuito per accedere alla tessera digitale e alle offerte esclusive.</div>
+          <button class="guest-lock-btn" onclick="goToLogin()">Accedi o registrati</button>
+        </div>
+      </div>
+    `);
+  }
+  const accScreen = document.getElementById('screen-account');
+  if (accScreen) {
+    accScreen.insertAdjacentHTML('beforeend', `
+      <div class="guest-screen-lock">
+        <div class="guest-lock-box">
+          <div class="guest-lock-icon">👤</div>
+          <div class="guest-lock-title">Area riservata ai soci</div>
+          <div class="guest-lock-sub">Registrati per tenere traccia dei tuoi punti, visite e offerte usate.</div>
+          <button class="guest-lock-btn" onclick="goToLogin()">Accedi o registrati</button>
+        </div>
+      </div>
+    `);
+  }
+  const greet = document.getElementById('greeting-text');
+  if (greet) greet.textContent = 'Benvenuto 👋';
 }
 
-// ===== AGGIORNA UI CON DATI UTENTE =====
+function goToLogin() {
+  sessionStorage.removeItem('guest_mode');
+  window.location.replace('login.html');
+}
+
+// ===== UI =====
 function updateUI() {
   if (!userProfile) return;
-  const nome = userProfile.nome || 'Utente';
-  const cognome = userProfile.cognome || '';
+  const nome     = userProfile.nome || 'Utente';
+  const cognome  = userProfile.cognome || '';
   const fullname = nome + (cognome ? ' ' + cognome : '');
   const initials = (nome[0] || '') + (cognome[0] || '');
-  const pts = userProfile.punti || 0;
-  const lv  = getLevel(pts);
-  const pct = lv.max < 9999 ? Math.round(((pts - lv.min) / (lv.max - lv.min)) * 100) : 100;
+  const pts      = userProfile.punti || 0;
+  const lv       = getLevel(pts);
+  const pct      = lv.max < 9999 ? Math.round(((pts - lv.min) / (lv.max - lv.min)) * 100) : 100;
   const nextLabel = lv.next ? `${lv.max - pts} pt → ${lv.next}` : 'Livello massimo 🏆';
 
-  // Hero
   setText('hero-points', pts);
   setText('hero-level', lv.name);
   setStyle('hero-progress-fill', 'width', pct + '%');
   setText('hero-progress-label', lv.next ? `${lv.max - pts} pt al livello ${lv.next}` : 'Livello massimo 🏆');
 
-  // QR screen
   setText('qr-fullname', fullname);
   setText('qr-avatar', initials || '?');
   setText('qr-level-badge', '✦ Membro ' + lv.name);
@@ -252,7 +175,6 @@ function updateUI() {
   setText('qr-next-label', nextLabel);
   setStyle('qr-progress-fill', 'width', pct + '%');
 
-  // Account
   setText('acc-avatar', initials || '?');
   setText('acc-name', fullname);
   setText('acc-email', userProfile.email || '');
@@ -261,10 +183,7 @@ function updateUI() {
   setText('stat-visits', userProfile.visite || 0);
   setText('stat-used', userProfile.offerte_usate || 0);
 
-  // Greeting
   setGreeting();
-
-  // Genera QR
   generateQR();
 }
 
@@ -277,67 +196,47 @@ function setStyle(id, prop, val) {
   if (el) el.style[prop] = val;
 }
 
-// ===== QR GENERATOR =====
-// Genera un QR reale con la libreria QRCode.js
-// Il payload è: club1piano:{userId}:{timestamp rotante}
+// ===== QR =====
 function getQRPayload() {
-  const uid = currentUser ? currentUser.id : 'demo';
-  // Slot di 5 minuti per la rotazione
+  const uid  = currentUser ? currentUser.id : 'guest';
   const slot = Math.floor(Date.now() / (5 * 60 * 1000));
   return `club1piano:${uid}:${slot}`;
 }
-
 function generateQR() {
   const payload = getQRPayload();
-  // Canvas principale (schermata QR)
   const mainCanvas = document.getElementById('qr-canvas');
   if (mainCanvas && typeof QRCode !== 'undefined') {
-    QRCode.toCanvas(mainCanvas, payload, {
-      width: 176, margin: 1,
-      color: { dark: '#0D0D0D', light: '#FFFFFF' }
-    });
+    QRCode.toCanvas(mainCanvas, payload, { width: 176, margin: 1, color: { dark: '#0D0D0D', light: '#FFFFFF' } });
   }
-  // Canvas mini (hero card)
   const miniCanvas = document.getElementById('mini-qr-canvas');
   if (miniCanvas && typeof QRCode !== 'undefined') {
-    QRCode.toCanvas(miniCanvas, payload, {
-      width: 80, margin: 1,
-      color: { dark: '#0D0D0D', light: '#FFFFFF' }
-    });
+    QRCode.toCanvas(miniCanvas, payload, { width: 80, margin: 1, color: { dark: '#0D0D0D', light: '#FFFFFF' } });
   }
 }
 
-// ===== TIMER QR (5 minuti) =====
 let qrTimerInterval = null;
-let qrSecondsLeft = 300;
+let qrSecondsLeft   = 300;
 
 function startQRTimer() {
   if (qrTimerInterval) clearInterval(qrTimerInterval);
-  // Calcola i secondi rimanenti nello slot corrente
   const slotMs = 5 * 60 * 1000;
   qrSecondsLeft = Math.ceil((slotMs - (Date.now() % slotMs)) / 1000);
   updateTimerDisplay();
   qrTimerInterval = setInterval(() => {
     qrSecondsLeft--;
     if (qrSecondsLeft <= 0) {
-      // Nuovo slot: rigenera QR
       generateQR();
-      const slotMs2 = 5 * 60 * 1000;
-      qrSecondsLeft = Math.ceil((slotMs2 - (Date.now() % slotMs2)) / 1000);
+      qrSecondsLeft = Math.ceil((slotMs - (Date.now() % slotMs)) / 1000);
     }
     updateTimerDisplay();
   }, 1000);
 }
-
 function updateTimerDisplay() {
   const m = Math.floor(qrSecondsLeft / 60);
   const s = qrSecondsLeft % 60;
-  const el = document.getElementById('qr-timer');
-  if (el) el.textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
   const val = document.getElementById('qr-validity');
   if (val) val.innerHTML = `Codice valido · si rinnova tra <span id="qr-timer">${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}</span>`;
 }
-
 function refreshQR() {
   const box = document.getElementById('qr-box');
   const btn = document.getElementById('refresh-qr');
@@ -354,7 +253,7 @@ function refreshQR() {
   }, 900);
 }
 
-// ===== RENDER OFFERTE =====
+// ===== OFFERTE RENDER =====
 function renderHomeOffers() {
   const scroll = document.getElementById('offer-scroll');
   scroll.innerHTML = OFFERS.filter(o => o.active).map(o => `
@@ -370,9 +269,8 @@ function renderHomeOffers() {
     </div>
   `).join('');
 }
-
 function renderOfferList(filter = 'all') {
-  const list = document.getElementById('offer-list');
+  const list  = document.getElementById('offer-list');
   const items = filter === 'all' ? OFFERS : OFFERS.filter(o => o.category === filter);
   list.innerHTML = items.map(o => `
     <div class="offer-full-card${o.active ? '' : ' dimmed'}"${o.active ? ` onclick="openModal(${o.id})"` : ''}>
@@ -394,7 +292,6 @@ function renderOfferList(filter = 'all') {
     </div>
   `).join('');
 }
-
 function initFilters() {
   document.querySelectorAll('.filter-pill').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -422,105 +319,90 @@ function openModal(offerId) {
   `;
   document.getElementById('offer-modal').classList.remove('hidden');
 }
-
 function closeModal(event) {
   if (!event) { document.getElementById('offer-modal').classList.add('hidden'); return; }
   if (event.target === document.getElementById('offer-modal') || event.target.closest('.modal-close')) {
     document.getElementById('offer-modal').classList.add('hidden');
   }
 }
-
 function useOffer(id) {
   document.getElementById('offer-modal').classList.add('hidden');
-  goTo('screen-qr');
-  showToast('QR pronto — mostralo al personale! ✓');
+  requireAuth(() => {
+    goTo('screen-qr');
+    showToast('QR pronto — mostralo al personale! ✓');
+  });
 }
 
-// ===== NOTIFICHE PUSH REALI =====
-// Usa la Web Push API nativa del browser (funziona su Android Chrome e Safari iOS 16.4+)
-// Le notifiche locali pianificate funzionano senza server.
-// Per notifiche server-side usa Supabase Edge Functions + VAPID.
+// ===== SERVICE WORKER =====
+let swRegistration = null;
+async function registerServiceWorker() {
+  if (!('serviceWorker' in navigator)) return;
+  try {
+    swRegistration = await navigator.serviceWorker.register('/sw.js');
+  } catch(e) { console.warn('Service worker non registrato:', e); }
+}
 
+// ===== PUSH =====
 let pushGranted = false;
 
 function checkPushStatus() {
   if (!('Notification' in window)) return;
-  if (Notification.permission === 'granted') {
-    pushGranted = true;
-    updatePushUI(true);
-    scheduleLocalPush();
-  } else {
-    updatePushUI(false);
-  }
+  const granted = Notification.permission === 'granted';
+  pushGranted = granted;
+  updatePushUI(granted);
   const dot = document.getElementById('notif-dot');
-  if (dot) dot.style.display = Notification.permission !== 'granted' ? 'block' : 'none';
+  if (dot) dot.style.display = granted ? 'none' : 'block';
 }
 
 async function requestPushPermission() {
-  if (!('Notification' in window)) {
+  if (!('Notification' in window) || !('serviceWorker' in navigator)) {
     showToast('Notifiche non supportate su questo browser');
     return;
   }
-  if (Notification.permission === 'granted') {
-    showToast('Notifiche già attive ✓');
-    return;
-  }
+  if (Notification.permission === 'granted') { showToast('Notifiche già attive ✓'); return; }
+
   const perm = await Notification.requestPermission();
-  if (perm === 'granted') {
-    pushGranted = true;
-    updatePushUI(true);
-    const dot = document.getElementById('notif-dot');
-    if (dot) dot.style.display = 'none';
-    // Notifica immediata di benvenuto
-    new Notification('Club 1 Piano 🥂', {
-      body: 'Notifiche attive! Ti avviseremo ogni giorno alle 15:00.',
-      icon: 'https://www.portagalliana-clubprimopiano.com/assets/logo.png',
-      badge: 'https://www.portagalliana-clubprimopiano.com/assets/logo.png',
+  if (perm !== 'granted') { showToast('Permesso notifiche negato'); return; }
+
+  pushGranted = true;
+  updatePushUI(true);
+  const dot = document.getElementById('notif-dot');
+  if (dot) dot.style.display = 'none';
+  await subscribeToPush();
+  showToast('Notifiche attivate ✓');
+}
+
+async function subscribeToPush() {
+  try {
+    if (!swRegistration) await registerServiceWorker();
+    if (!swRegistration) return;
+    const res = await fetch(API + '/api/push/vapid-public-key');
+    if (!res.ok) return;
+    const { key } = await res.json();
+    const subscription = await swRegistration.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: urlBase64ToUint8Array(key),
     });
-    scheduleLocalPush();
-    showToast('Notifiche attivate ✓');
-  } else {
-    showToast('Permesso notifiche negato');
-  }
+    await fetch(API + '/api/push/subscribe', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ subscription }),
+    });
+  } catch(e) { console.warn('Subscription push fallita:', e); }
+}
+
+function urlBase64ToUint8Array(base64String) {
+  const padding = '='.repeat((4 - base64String.length % 4) % 4);
+  const base64  = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+  const raw     = atob(base64);
+  return Uint8Array.from([...raw].map(c => c.charCodeAt(0)));
 }
 
 function updatePushUI(active) {
-  const btn  = document.getElementById('notif-toggle-btn');
-  const sub  = document.getElementById('notif-status-text');
-  if (btn) {
-    btn.textContent = active ? 'Attive ✓' : 'Attiva';
-    btn.classList.toggle('active', active);
-  }
-  if (sub) sub.textContent = active ? 'Ricevi offerte ogni giorno alle 15:00' : 'Attiva per non perdere le offerte';
-}
-
-function scheduleLocalPush() {
-  // Pianifica una notifica locale per oggi alle 15:00 (o domani se già passate)
-  if (!pushGranted && Notification.permission !== 'granted') return;
-
-  const now = new Date();
-  const target = new Date();
-  target.setHours(15, 0, 0, 0);
-  if (now >= target) target.setDate(target.getDate() + 1);
-
-  const msUntil = target.getTime() - now.getTime();
-
-  // Cancella timer precedente
-  if (window._pushTimer) clearTimeout(window._pushTimer);
-
-  window._pushTimer = setTimeout(() => {
-    if (Notification.permission === 'granted') {
-      new Notification('Club 1 Piano ti aspetta! 🍹', {
-        body: 'Vieni a scoprire le offerte di Club Primo Piano. Ti aspettiamo stasera!',
-        icon: 'https://www.portagalliana-clubprimopiano.com/assets/logo.png',
-        badge: 'https://www.portagalliana-clubprimopiano.com/assets/logo.png',
-        tag: 'daily-offer',
-        renotify: true,
-      });
-    }
-    // Ripianifica per il giorno dopo
-    setTimeout(scheduleLocalPush, 60 * 1000);
-  }, msUntil);
+  const btn = document.getElementById('notif-toggle-btn');
+  const sub = document.getElementById('notif-status-text');
+  if (btn) { btn.textContent = active ? 'Attive ✓' : 'Attiva'; btn.classList.toggle('active', active); }
+  if (sub) sub.textContent = active ? 'Notifiche push attive' : 'Attiva per non perdere le offerte';
 }
 
 // ===== TOAST =====
@@ -535,11 +417,31 @@ function showToast(msg) {
 
 // ===== GREETING =====
 function setGreeting() {
-  const h = new Date().getHours();
+  const h      = new Date().getHours();
   const saluto = h < 12 ? 'Buongiorno' : h < 18 ? 'Buon pomeriggio' : 'Buonasera';
-  const nome = userProfile?.nome || 'Benvenuto';
-  const el = document.getElementById('greeting-text');
+  const nome   = isGuest ? 'Ospite' : (userProfile?.nome || 'Benvenuto');
+  const el     = document.getElementById('greeting-text');
   if (el) el.textContent = `${saluto}, ${nome} 👋`;
+}
+
+// ===== TEMA =====
+function initTheme() {
+  if (localStorage.getItem('theme') === 'light') applyTheme('light');
+}
+function applyTheme(mode) {
+  const isLight = mode === 'light';
+  document.body.classList.toggle('theme-light', isLight);
+  const toggle = document.getElementById('theme-toggle');
+  const icon   = document.getElementById('theme-icon');
+  const label  = document.getElementById('theme-label');
+  if (toggle) toggle.classList.toggle('on', isLight);
+  if (icon)   icon.className = isLight ? 'ti ti-sun' : 'ti ti-moon-stars';
+  if (label)  label.textContent = isLight ? 'Tema chiaro' : 'Tema scuro';
+}
+function toggleTheme() {
+  const next = document.body.classList.contains('theme-light') ? 'dark' : 'light';
+  localStorage.setItem('theme', next);
+  applyTheme(next);
 }
 
 // ===== UTILS =====
@@ -547,34 +449,35 @@ function capitalize(str) {
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
-// ===== SPLASH + INIT =====
+// ===== INIT =====
 document.addEventListener('DOMContentLoaded', async () => {
-  // Nascondi splash dopo 1.9s
+  initTheme();
+
   setTimeout(async () => {
     const splash = document.getElementById('splash');
     splash.style.opacity = '0';
     splash.style.transition = 'opacity 0.5s';
     setTimeout(() => splash.style.display = 'none', 500);
 
-    // Controlla sessione Supabase esistente
-    if (sb) {
-      const { data: { session } } = await sb.auth.getSession();
-      if (session?.user) {
-        await loadProfile(session.user);
-        document.getElementById('auth-screen').classList.add('hidden');
-        document.getElementById('app').classList.remove('hidden');
-        updateUI();
-        renderHomeOffers();
-        renderOfferList('all');
-        initFilters();
-        setGreeting();
-        scheduleLocalPush();
-        checkPushStatus();
-        return;
-      }
+    // Guest mode
+    if (sessionStorage.getItem('guest_mode') === 'true') {
+      isGuest = true;
+      await enterApp();
+      return;
     }
 
-    // Mostra auth
-    document.getElementById('auth-screen').classList.remove('hidden');
+    // Controlla sessione via server (cookie httpOnly)
+    try {
+      const res = await fetch(API + '/api/auth/session');
+      if (res.ok) {
+        const { user, profile } = await res.json();
+        currentUser = user;
+        userProfile = profile;
+        await enterApp();
+        return;
+      }
+    } catch(e) { /* server non disponibile */ }
+
+    window.location.replace('login.html');
   }, 1900);
 });

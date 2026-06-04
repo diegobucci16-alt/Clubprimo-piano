@@ -1,0 +1,15 @@
+# Env files — mai committare chiavi reali
+.env
+server/.env
+
+# Dependencies
+node_modules/
+server/node_modules/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.claude/
